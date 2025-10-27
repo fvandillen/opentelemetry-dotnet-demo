@@ -7,10 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.10"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
+        <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.5.2" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\OpenTelemetryDemo.Domain\OpenTelemetryDemo.Domain.csproj" />
       <ProjectReference Include="..\OpenTelemetryDemo.ServiceDefaults\OpenTelemetryDemo.ServiceDefaults.csproj" />
     </ItemGroup>
 

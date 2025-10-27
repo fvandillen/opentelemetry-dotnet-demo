@@ -1,17 +1,22 @@
-var builder = WebApplication.CreateBuilder(args);
+using Microsoft.EntityFrameworkCore;
+using OpenTelemetryDemo.OrderingApi.Database;
 
+var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
-builder.Services.AddOpenApi();
+builder.AddNpgsqlDbContext<OrderingContext>(connectionName: "ordering");
 
 var app = builder.Build();
+app.UseServiceDefaults();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.MapGet("/test", async (OrderingContext db) =>
 {
-    app.MapOpenApi();
+    var orders = await db.Orders.ToListAsync();
+    return orders;
+});
+
+using (var scope = app.Services.CreateScope())
+{
+    await scope.ServiceProvider.GetRequiredService<OrderingContext>().Database.EnsureCreatedAsync();
 }
-
-app.UseHttpsRedirection();
-
 
 app.Run();

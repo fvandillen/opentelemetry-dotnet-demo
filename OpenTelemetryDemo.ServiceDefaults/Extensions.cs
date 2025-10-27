@@ -20,6 +20,8 @@ public static class Extensions
 
     public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
+        builder.Services.AddOpenApi();
+        
         builder.ConfigureOpenTelemetry();
 
         builder.AddDefaultHealthChecks();
@@ -125,6 +127,17 @@ public static class Extensions
             });
         }
 
+        return app;
+    }
+
+    public static WebApplication UseServiceDefaults(this WebApplication app)
+    {
+        // Configure the HTTP request pipeline.
+        if (app.Environment.IsDevelopment())
+        {
+            app.MapOpenApi();
+        }
+        app.UseHttpsRedirection();
         return app;
     }
 }
