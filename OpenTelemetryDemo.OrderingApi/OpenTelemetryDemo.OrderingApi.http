@@ -1,0 +1,6 @@
+@OpenTelemetryDemo.OrderingApi_HostAddress = http://localhost:5268
+
+GET {{OpenTelemetryDemo.OrderingApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

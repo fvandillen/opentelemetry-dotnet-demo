@@ -1,3 +1,11 @@
 <Solution>
-  <Project Path="OpenTelemetryDemo.AppHost/OpenTelemetryDemo.AppHost.csproj" />
+  <Folder Name="/Aspire/">
+    <Project Path="OpenTelemetryDemo.AppHost/OpenTelemetryDemo.AppHost.csproj" />
+    <Project Path="OpenTelemetryDemo.ServiceDefaults\OpenTelemetryDemo.ServiceDefaults.csproj" Type="Classic C#" />
+  </Folder>
+  <Folder Name="/AutoInstrumentation/">
+    <Project Path="OpenTelemetryDemo.WeatherApi\OpenTelemetryDemo.WeatherApi.csproj" Type="Classic C#" />
+  </Folder>
+  <Project Path="OpenTelemetryDemo.InventoryApi\OpenTelemetryDemo.InventoryApi.csproj" Type="Classic C#" />
+  <Project Path="OpenTelemetryDemo.OrderingApi\OpenTelemetryDemo.OrderingApi.csproj" Type="Classic C#" />
 </Solution>
