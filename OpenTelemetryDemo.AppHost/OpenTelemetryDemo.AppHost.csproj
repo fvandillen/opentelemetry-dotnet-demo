@@ -14,4 +14,13 @@
     <PackageReference Include="Aspire.Hosting.AppHost" Version="9.5.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\OpenTelemetryDemo.InventoryApi\OpenTelemetryDemo.InventoryApi.csproj" />
+    <ProjectReference Include="..\OpenTelemetryDemo.OrderingApi\OpenTelemetryDemo.OrderingApi.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Grafana\" />
+  </ItemGroup>
+
 </Project>
