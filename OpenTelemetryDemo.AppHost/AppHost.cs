@@ -16,14 +16,22 @@ var grafana = builder.AddContainer("grafana", "grafana/grafana")
 builder.AddOpenTelemetryCollector("otelcollector", "../otelcollector/config.yaml")
     .WithEnvironment("PROMETHEUS_ENDPOINT", $"{prometheus.GetEndpoint("http")}/api/v1/otlp");
 
-var inventoryApi = builder.AddProject<Projects.OpenTelemetryDemo_InventoryApi>("inventory-api");
+var queue = builder.AddAzureServiceBus("servicebus").RunAsEmulator().AddServiceBusQueue("orders");
+
+var inventoryApi = builder
+    .AddProject<Projects.OpenTelemetryDemo_InventoryApi>("inventory-api")
+    .WaitFor(queue)
+    .WithReference(queue);
 
 var orderingDbServer = builder.AddPostgres("ordering-db");
 var orderingDb = orderingDbServer.AddDatabase("ordering");
 
-builder.AddProject<Projects.OpenTelemetryDemo_OrderingApi>("ordering-api")
+builder
+    .AddProject<Projects.OpenTelemetryDemo_OrderingApi>("ordering-api")
     .WithReference(inventoryApi)
     .WaitFor(orderingDb)
-    .WithReference(orderingDb);
+    .WithReference(orderingDb)
+    .WaitFor(queue)
+    .WithReference(queue);
 
 builder.Build().Run();

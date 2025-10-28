@@ -1,3 +1,5 @@
+using System.Text.Json;
+using Azure.Messaging.ServiceBus;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetryDemo.Domain;
@@ -10,6 +12,7 @@ builder.AddServiceDefaults();
 builder.AddNpgsqlDbContext<OrderingContext>(connectionName: "ordering");
 builder.AddCustomMeter<OrderingMetrics>();
 builder.Services.AddSingleton<OrderFaker>();
+builder.AddAzureServiceBusClient(connectionName: "orders");
 
 var app = builder.Build();
 app.UseServiceDefaults();
@@ -34,11 +37,15 @@ app.MapPost("/order", async (OrderingContext db, OrderingMetrics metrics, Order 
     return Results.Ok(order);
 });
 
-app.MapPost("/order/generate", async (OrderingContext db, OrderingMetrics metrics, OrderFaker faker) =>
+app.MapPost("/order/generate", async (OrderingContext db, OrderingMetrics metrics, OrderFaker faker, ServiceBusClient serviceBus) =>
 {
     var order = faker.Generate(1).Single();
     await db.Orders.AddAsync(order);
     await db.SaveChangesAsync();
+    
+    var serviceBusMessage = new ServiceBusMessage(JsonSerializer.Serialize(order));
+    var sender = serviceBus.CreateSender("orders");
+    await sender.SendMessageAsync(serviceBusMessage);
     
     foreach(var productLine in order.OrderLines)
     {
