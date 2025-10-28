@@ -133,6 +133,23 @@ public static class Extensions
 
         return app;
     }
+    
+    public static IHostApplicationBuilder AddCustomMeter<T>(this IHostApplicationBuilder builder) where T : class
+    {
+        var meterName = typeof(T).FullName;
+        if(meterName is null) throw new InvalidOperationException("The meter name cannot be computed.");
+
+        builder.Services.AddSingleton<T>();
+        builder.Services
+            .AddOpenTelemetry()
+            .WithMetrics(metrics =>
+            {
+                metrics
+                    .AddMeter(meterName.ToLower());
+            });
+        
+        return builder;
+    }
 
     public static WebApplication UseServiceDefaults(this WebApplication app)
     {
