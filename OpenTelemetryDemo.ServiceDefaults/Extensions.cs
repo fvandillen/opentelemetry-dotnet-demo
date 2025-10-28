@@ -99,8 +99,8 @@ public static class Extensions
         //       .UseAzureMonitor();
         //}
         
-        builder.Services.AddOpenTelemetry()
-            .WithMetrics(metrics => metrics.AddPrometheusExporter());
+        // builder.Services.AddOpenTelemetry()
+        //     .WithMetrics(metrics => metrics.AddPrometheusExporter());
 
         return builder;
     }
