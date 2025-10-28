@@ -7,6 +7,7 @@ using Microsoft.Extensions.ServiceDiscovery;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using Scalar.AspNetCore;
 
 namespace Microsoft.Extensions.Hosting;
 
@@ -97,6 +98,9 @@ public static class Extensions
         //    builder.Services.AddOpenTelemetry()
         //       .UseAzureMonitor();
         //}
+        
+        builder.Services.AddOpenTelemetry()
+            .WithMetrics(metrics => metrics.AddPrometheusExporter());
 
         return builder;
     }
@@ -136,6 +140,11 @@ public static class Extensions
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
+            app.MapScalarApiReference(options =>
+            {
+                options.DarkMode = true;
+                options.HideModels = true;
+            });
         }
         app.UseHttpsRedirection();
         return app;

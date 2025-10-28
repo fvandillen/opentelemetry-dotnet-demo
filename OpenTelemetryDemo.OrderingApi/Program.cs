@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetryDemo.Domain;
 using OpenTelemetryDemo.OrderingApi.Database;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,9 +15,26 @@ app.MapGet("/test", async (OrderingContext db) =>
     return orders;
 });
 
+app.MapPost("/order", async (OrderingContext db, Order order) =>
+{
+    await db.Orders.AddAsync(order);
+    await db.SaveChangesAsync();
+    // TODO: send service bus message.
+    return Results.Ok(order);
+});
+
 using (var scope = app.Services.CreateScope())
 {
-    await scope.ServiceProvider.GetRequiredService<OrderingContext>().Database.EnsureCreatedAsync();
+    var db = scope.ServiceProvider.GetRequiredService<OrderingContext>();
+    await db.Database.EnsureCreatedAsync();
+
+    await db.Orders.AddAsync(
+        new Order()
+        {
+            Id = Guid.NewGuid(), 
+            OrderLines = [new OrderLine { ProductName = "Blue hat", Quantity = 7 }]
+        });
+    await db.SaveChangesAsync();
 }
 
 app.Run();

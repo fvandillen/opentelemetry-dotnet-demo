@@ -20,8 +20,4 @@
     <ProjectReference Include="..\OpenTelemetryDemo.OrderingApi\OpenTelemetryDemo.OrderingApi.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Grafana\" />
-  </ItemGroup>
-
 </Project>
