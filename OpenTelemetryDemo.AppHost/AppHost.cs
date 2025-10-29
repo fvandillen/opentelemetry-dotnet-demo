@@ -2,6 +2,8 @@ using OpenTelemetryDemo.AppHost.OpenTelemetryCollector;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
+var appInsightsConnectionString = builder.AddParameter("appInsightsConnectionString", true);
+
 var prometheus = builder.AddContainer("prometheus", "prom/prometheus", "v3.2.1")
     .WithBindMount("../prometheus", "/etc/prometheus", isReadOnly: true)
     .WithArgs("--web.enable-otlp-receiver", "--config.file=/etc/prometheus/prometheus.yml")
@@ -21,6 +23,7 @@ var queue = builder.AddAzureServiceBus("servicebus").RunAsEmulator().AddServiceB
 var inventoryApi = builder
     .AddProject<Projects.OpenTelemetryDemo_InventoryApi>("inventory-api")
     .WaitFor(queue)
+    .WithEnvironment("APPLICATIONINSIGHTS_CONNECTION_STRING", appInsightsConnectionString)
     .WithReference(queue);
 
 var orderingDbServer = builder.AddPostgres("ordering-db");
@@ -28,6 +31,7 @@ var orderingDb = orderingDbServer.AddDatabase("ordering");
 
 builder
     .AddProject<Projects.OpenTelemetryDemo_OrderingApi>("ordering-api")
+    .WithEnvironment("APPLICATIONINSIGHTS_CONNECTION_STRING", appInsightsConnectionString)
     .WithReference(inventoryApi)
     .WaitFor(orderingDb)
     .WithReference(orderingDb)

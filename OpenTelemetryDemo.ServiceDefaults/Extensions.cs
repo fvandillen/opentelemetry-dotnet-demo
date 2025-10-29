@@ -1,3 +1,5 @@
+using Azure.Identity;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
@@ -65,20 +67,20 @@ public static class Extensions
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation();
-            })
+            });
+            
+        builder.Services.AddOpenTelemetry()
             .WithTracing(tracing =>
             {
                 tracing
                     .AddSource(builder.Environment.ApplicationName)
                     .AddSource("Azure.Messaging.*")
-                    .AddAspNetCoreInstrumentation(tracing =>
+                    .AddAspNetCoreInstrumentation(aspnetcoreTracing =>
                         // Exclude health check requests from tracing
-                        tracing.Filter = context =>
+                        aspnetcoreTracing.Filter = context =>
                             !context.Request.Path.StartsWithSegments(HealthEndpointPath)
                             && !context.Request.Path.StartsWithSegments(AlivenessEndpointPath)
                     )
-                    // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
-                    //.AddGrpcClientInstrumentation()
                     .AddHttpClientInstrumentation();
             });
 
@@ -96,16 +98,16 @@ public static class Extensions
         {
             builder.Services.AddOpenTelemetry().UseOtlpExporter();
         }
-
-        // Uncomment the following lines to enable the Azure Monitor exporter (requires the Azure.Monitor.OpenTelemetry.AspNetCore package)
-        //if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
-        //{
-        //    builder.Services.AddOpenTelemetry()
-        //       .UseAzureMonitor();
-        //}
         
-        // builder.Services.AddOpenTelemetry()
-        //     .WithMetrics(metrics => metrics.AddPrometheusExporter());
+        if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
+        {
+            builder.Services.AddOpenTelemetry()
+               .UseAzureMonitor(options =>
+               {
+                   options.ConnectionString = builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"];
+                   options.Credential = new DefaultAzureCredential();
+               });
+        }
 
         return builder;
     }
